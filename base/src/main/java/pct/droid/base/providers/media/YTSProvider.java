@@ -200,7 +200,12 @@ public class YTSProvider extends MediaProvider {
 
                     YTSReponse result;
                     try {
-                        result = mGson.fromJson(responseStr, YTSReponse.class);
+                        //result = mGson.fromJson(responseStr, YTSReponse.class);
+                        LinkedTreeMap<String, Object> map = mGson.fromJson(responseStr, LinkedTreeMap.class);
+                        if(map == null) {
+                            callback.onFailure(new NetworkErrorException("No response"));
+                        }
+                        result = new YTSReponse(map);
                     } catch (IllegalStateException | JsonSyntaxException e) {
                         onFailure(response.request(), new IOException("JSON Failed"));
                         return;
@@ -236,6 +241,10 @@ public class YTSProvider extends MediaProvider {
         public String status_message;
         public LinkedTreeMap<String, Object> data;
 
+        public YTSReponse(LinkedTreeMap<String, Object> data) {
+            this.data = data;
+        }
+
         /**
          * Test if there is an item that already exists
          *
@@ -261,7 +270,7 @@ public class YTSProvider extends MediaProvider {
         public ArrayList<Media> formatForPopcorn(ArrayList<Media> existingList) {
             ArrayList<LinkedTreeMap<String, Object>> movies = new ArrayList<>();
             if (data != null) {
-                movies = (ArrayList<LinkedTreeMap<String, Object>>) data.get("MovieList");
+                movies = (ArrayList<LinkedTreeMap<String, Object>>) data.get("MovieList");;
             }
 
             for (LinkedTreeMap<String, Object> item : movies) {
@@ -280,10 +289,10 @@ public class YTSProvider extends MediaProvider {
                     movie.image = (String) item.get("poster_med");
                     movie.headerImage = (String) item.get("poster_med");
                     movie.trailer = "https://youtube.com/watch?v=" + item.get("trailer");
-                    Double runtime = (Double) item.get("runtime");
-                    movie.runtime = Integer.toString(runtime.intValue());
+                    //Double runtime = (Double) item.get("runtime");
+                    movie.runtime = "N/A";
                     movie.synopsis = (String) item.get("description");
-                    movie.certification = (String) item.get("mpa_rating");
+                    movie.certification = "N/A";
                     movie.fullImage = movie.image;
 
                     ArrayList<LinkedTreeMap<String, Object>> torrents =
@@ -292,6 +301,11 @@ public class YTSProvider extends MediaProvider {
                         for (LinkedTreeMap<String, Object> torrentObj : torrents) {
                             String quality = (String) torrentObj.get("quality");
                             if (quality == null) continue;
+                            try{
+                                Integer.parseInt(quality.trim());
+                            } catch (NumberFormatException ignored){
+                                continue;
+                            }
 
                             Media.Torrent torrent = new Media.Torrent();
 

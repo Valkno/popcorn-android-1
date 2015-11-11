@@ -17,6 +17,7 @@
 
 package pct.droid.activities;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -84,14 +85,15 @@ public class MainActivity extends PopcornBaseActivity implements NavigationDrawe
     TabLayout mTabs;
     NavigationDrawerFragment mNavigationDrawerFragment;
 
+    @SuppressLint("MissingSuperCall")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState, R.layout.activity_main);
 
-        if(SignUtils.checkAppSignature(this) != SignUtils.VALID && !pct.droid.base.BuildConfig.GIT_BRANCH.equals("local")) {
-            MessageDialogFragment.show(getFragmentManager(), R.string.signature_invalid, R.string.possibly_dangerous, false);
-            return;
-        }
+//        if(SignUtils.checkAppSignature(this) != SignUtils.VALID && !pct.droid.base.BuildConfig.GIT_BRANCH.equals("local")) {
+//            MessageDialogFragment.show(getFragmentManager(), R.string.signature_invalid, R.string.possibly_dangerous, false);
+//            return;
+//        }
 
         if (!PrefUtils.contains(this, TermsActivity.TERMS_ACCEPTED)) {
             startActivity(new Intent(this, TermsActivity.class));
